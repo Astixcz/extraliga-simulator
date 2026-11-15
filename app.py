@@ -10,12 +10,13 @@ st.set_page_config(page_title="Simulátor Tipsport Extraligy", layout="wide")
 # KROK 1: NAČTENÍ A VYČIŠTĚNÍ DAT
 # ==========================================
 @st.cache_data
-def nacti_a_vycisti_data(nahrany_soubor):
+def nacti_a_vycisti_data(zdroj_dat):
     try:
-        df = pd.read_csv(nahrany_soubor, sep=";", encoding="utf-8")
+        df = pd.read_csv(zdroj_dat, sep=";", encoding="utf-8")
     except UnicodeDecodeError:
-        nahrany_soubor.seek(0)
-        df = pd.read_csv(nahrany_soubor, sep=";", encoding="cp1250")
+        if hasattr(zdroj_dat, "seek"):
+            zdroj_dat.seek(0)
+        df = pd.read_csv(zdroj_dat, sep=";", encoding="cp1250")
     
     slovnik_tymu = {
         "HC Oceláři Třinec": "Třinec",
@@ -240,15 +241,26 @@ st.title("🏒 Matematický simulátor Tipsport Extraligy")
 
 with st.sidebar:
     st.header("1. Vstupní data")
-    nahrany_soubor = st.file_uploader("Nahraj CSV soubor ze systému", type=["csv"])
+    nahrany_soubor = st.file_uploader("Volitelně: Nahraj novější CSV soubor", type=["csv"])
     
     st.header("2. Parametry simulace")
     pocet_sim = st.slider("Počet simulací sezóny", min_value=1000, max_value=20000, value=5000, step=1000)
     vyhoda_domaci = st.slider("Bonifikace domácího prostředí (body Elo)", min_value=0, max_value=100, value=50, step=5)
 
+# Rozhodnutí, jaký soubor použít (nahraný od uživatele má přednost před výchozím export.csv)
+import os
 if nahrany_soubor is not None:
-    odehrane, budouci, vsechny_tymy = nacti_a_vycisti_data(nahrany_soubor)
-    
+    aktivni_zdroj = nahrany_soubor
+    st.sidebar.success("✅ Používám tvůj nahraný soubor.")
+elif os.path.exists("export.csv"):
+    aktivni_zdroj = "export.csv"
+    st.sidebar.info("ℹ️ Používám výchozí data z GitHubu (export.csv).")
+else:
+    aktivni_zdroj = None
+
+if aktivni_zdroj is not None:
+    odehrane, budouci, vsechny_tymy = nacti_a_vycisti_data(aktivni_zdroj)
+    odehrane, budouci, vsechny_tymy = nacti_a_vycisti_data(nahrany_soubor)    
     st.subheader(f"📊 Aktuální reálná tabulka (odehráno {len(odehrane)} z {len(odehrane) + len(budouci)} zápasů)")
     aktualni_tab = vytvor_aktualni_tabulku(odehrane, vsechny_tymy)
     st.dataframe(aktualni_tab, use_container_width=True)
