@@ -123,7 +123,7 @@ if aktivni_zdroj is not None:
         styly = pd.DataFrame("", index=df.index, columns=df.columns)
         for i in range(len(df)):
             poradi = df.iloc[i]["Pořadí"]
-            if poradi in:
+if poradi in:
                 styly.iloc[i, :] = "border-bottom: 3px solid #ff4b4b;"
         return styly
 
