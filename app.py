@@ -10,8 +10,13 @@ st.set_page_config(page_title="Simulátor Tipsport Extraligy", layout="wide")
 # KROK 1: NAČTENÍ A VYČIŠTĚNÍ DAT
 # ==========================================
 @st.cache_data
-def nacti_a_vycisti_data(nahrany_soubor):
-    df = pd.read_csv(nahrany_soubor, sep=";")
+    def nacti_a_vycisti_data(nahrany_soubor):
+        try:
+        df = pd.read_csv(nahrany_soubor, sep=";", encoding="utf-8")
+    except UnicodeDecodeError:
+        nahrany_soubor.seek(0)
+        df = pd.read_csv(nahrany_soubor, sep=";", encoding="cp1250")
+
     
     slovnik_tymu = {
         "HC Oceláři Třinec": "Třinec",
