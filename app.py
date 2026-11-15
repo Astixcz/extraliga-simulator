@@ -176,7 +176,7 @@ def vytvor_aktualni_tabulku(odehrane_df, vsechny_tymy):
     df_tab.insert(0, "Pořadí", range(1, len(df_tab) + 1))
     return df_tab
 
-def spust_simulaci_matice(aktualni_tab_df, budouci_df, sance_zapasu_list, pocet_simulaci=5000):
+def spust_simulaci_matice(aktualni_tab_df, budouci_df, sance_zapasu_list, pocet_simulaci=10000):
     tymy = list(aktualni_tab_df.index)
     tym_na_idx = {tym: i for i, tym in enumerate(tymy)}
     n_tymu = len(tymy)
@@ -235,7 +235,6 @@ def spust_simulaci_matice(aktualni_tab_df, budouci_df, sance_zapasu_list, pocet_
         
     df_matice = pd.DataFrame(vysledky).set_index("Tým")
     return df_matice
-
 # ==========================================
 # KROK 4: UŽIVATELSKÉ ROZHRANÍ (STREAMLIT)
 # ==========================================
@@ -246,7 +245,7 @@ with st.sidebar:
     nahrany_soubor = st.file_uploader("Volitelně: Nahraj novější CSV soubor", type=["csv"])
     
     st.header("2. Parametry simulace")
-    pocet_sim = st.slider("Počet simulací sezóny", min_value=1000, max_value=20000, value=5000, step=1000)
+    pocet_sim = st.slider("Počet simulací sezóny", min_value=1000, max_value=20000, value=10000, step=1000)
     vyhoda_domaci = st.slider("Bonifikace domácího prostředí (body Elo)", min_value=0, max_value=100, value=50, step=5)
     pocet_nejblizsich = st.slider("Počet nejbližších zápasů v predikci", min_value=1, max_value=14, value=7)
 
@@ -264,27 +263,11 @@ if aktivni_zdroj is not None:
     
     st.subheader(f"📊 Aktuální reálná tabulka (odehráno {len(odehrane)} z {len(odehrane) + len(budouci)} zápasů)")
     aktualni_tab = vytvor_aktualni_tabulku(odehrane, vsechny_tymy)
-    
-    # Vložení vizuálních oddělovacích řádků do aktuální tabulky po 4., 12. a 13. místě
-    def tabulka_s_mezerami(df):
-        radky = []
-        indexy = []
-        for i, (tym, radek) in enumerate(df.iterrows()):
-            radky.append(radek.astype(str).to_dict())
-            indexy.append(tym)
-            if i + 1 in (4, 12, 13):
-                prazdny = {col: "—" for col in df.columns}
-                nazev_oddelovace = "─── Hranice ČF ───" if i + 1 == 4 else ("─── Hranice Předkola ───" if i + 1 == 12 else "─── Hranice Baráže ───")
-                radky.append(prazdny)
-                indexy.append(nazev_oddelovace)
-        return pd.DataFrame(radky, index=indexy)
-
-    st.dataframe(tabulka_s_mezerami(aktualni_tab), use_container_width=True, height=635)
+    st.dataframe(aktualni_tab, use_container_width=True, height=530)
     
     st.divider()
     st.subheader("🔮 Simulace konečného pořadí a predikce nejbližších zápasů")
     
-    # Vložení vizuálních mezer (sloupců) mezi 4.|5., 12.|13. a 13.|14. místo
     def zobraz_matici(df_matice):
         df_viz = df_matice.copy()
         df_viz.insert(df_viz.columns.get_loc("5."), " ", "")
@@ -309,7 +292,6 @@ if aktivni_zdroj is not None:
         )
         st.dataframe(styler, use_container_width=True, height=530)
 
-    # Výpis nejbližších zápasů s pravděpodobnostmi 1 - X - 2
     def zobraz_nejblizsi_zapasy(budouci_df, sance_list, pocet):
         st.markdown(f"#### 📅 Predikce nejbližších {pocet} zápasů (1 – X – 2 po 60 minutách)")
         vyber = budouci_df.head(pocet)
@@ -335,6 +317,86 @@ if aktivni_zdroj is not None:
             hide_index=True,
             use_container_width=True
         )
+    tab_elo, tab_poisson, tab_power, tab_custom = st.tabs([
+        "📈 Model 1: Elo rating", 
+        "🥅 Model 2: Poisson (gólový)", 
+        "⚖️ Model 3: Power Index", 
+        "🎛️ Model 4: Vlastní síly týmů"
+    ])
+    
+    # --- ZÁLOŽKA 1: ELO ---
+    with tab_elo:
+        elo_sily = vypocitej_elo(odehrane, vsechny_tymy, vyhoda_domaci=vyhoda_domaci)
+        with st.expander("Zobrazit vypočítané Elo ratingy týmů (výchozí = 1500)"):
+            df_elo_sily = pd.DataFrame(
+                [(t, round(elo_sily[t], 1)) for t in aktualni_tab.index],
+                columns=["Tým", "Elo rating"]
+            ).set_index("Tým")
+            st.dataframe(df_elo_sily.T)
+            
+        sance_elo = [sance_zapas_rating(elo_sily, r["Domácí"], r["Hosté"], vyhoda_domaci) for _, r in budouci.iterrows()]
+        matice_elo = spust_simulaci_matice(aktualni_tab, budouci, sance_elo, pocet_sim)
+        zobraz_matici(matice_elo)
+        zobraz_nejblizsi_zapasy(budouci, sance_elo, pocet_nejblizsich)
+
+    # --- ZÁLOŽKA 2: POISSON ---
+    with tab_poisson:
+        pois_params, prum_dom, prum_hos = vypocitej_poisson_parametry(odehrane, vsechny_tymy)
+        with st.expander("Zobrazit útočnou a obrannou sílu týmů (1.00 = ligový průměr)"):
+            df_pois_sily = pd.DataFrame(
+                [(t, round(pois_params[t]["utok"], 2), round(pois_params[t]["obrana"], 2)) for t in aktualni_tab.index],
+                columns=["Tým", "Síla útoku (více = lépe)", "Propustnost obrany (méně = lépe)"]
+            ).set_index("Tým")
+            st.dataframe(df_pois_sily.T)
+            
+        sance_pois = [sance_zapas_poisson(pois_params, prum_dom, prum_hos, r["Domácí"], r["Hosté"]) for _, r in budouci.iterrows()]
+        matice_pois = spust_simulaci_matice(aktualni_tab, budouci, sance_pois, pocet_sim)
+        zobraz_matici(matice_pois)
+        zobraz_nejblizsi_zapasy(budouci, sance_pois, pocet_nejblizsich)
+
+    # --- ZÁLOŽKA 3: POWER INDEX ---
+    with tab_power:
+        power_sily = vypocitej_power_index(odehrane, vsechny_tymy)
+        with st.expander("Zobrazit vypočítaný Power Index týmů (kombinace bodů a skóre)"):
+            df_pow_sily = pd.DataFrame(
+                [(t, round(power_sily[t], 1)) for t in aktualni_tab.index],
+                columns=["Tým", "Power Index"]
+            ).set_index("Tým")
+            st.dataframe(df_pow_sily.T)
+            
+        sance_pow = [sance_zapas_rating(power_sily, r["Domácí"], r["Hosté"], vyhoda_domaci) for _, r in budouci.iterrows()]
+        matice_pow = spust_simulaci_matice(aktualni_tab, budouci, sance_pow, pocet_sim)
+        zobraz_matici(matice_pow)
+        zobraz_nejblizsi_zapasy(budouci, sance_pow, pocet_nejblizsich)
+
+    # --- ZÁLOŽKA 4: VLASTNÍ SÍLY ---
+    with tab_custom:
+        st.info("Uprav sílu týmů na škále 0 až 100 (výchozí hodnoty odpovídají modelu Elo). Po úpravě klikni na tlačítko níže.")
+        
+        vychozi_custom = pd.DataFrame({
+            "Tým": list(aktualni_tab.index),
+            "Vlastní síla (0-100)": [int(np.clip(round((elo_sily[t] - 1200) / 6), 1, 100)) for t in aktualni_tab.index]
+        })
+        
+        upravena_tab = st.data_editor(
+            vychozi_custom,
+            column_config={
+                "Tým": st.column_config.TextColumn(disabled=True),
+                "Vlastní síla (0-100)": st.column_config.NumberColumn(min_value=1, max_value=100, step=1)
+            },
+            hide_index=True,
+            use_container_width=True
+        )
+        
+        if st.button("🚀 Spustit simulaci s vlastními silami", type="primary"):
+            custom_dict = {
+                radek["Tým"]: 1200.0 + (radek["Vlastní síla (0-100)"] * 6.0)
+                for _, radek in upravena_tab.iterrows()
+            }
+            sance_cust = [sance_zapas_rating(custom_dict, r["Domácí"], r["Hosté"], vyhoda_domaci) for _, r in budouci.iterrows()]
+            matice_cust = spust_simulaci_matice(aktualni_tab, budouci, sance_cust, pocet_sim)
+            zobraz_matici(matice_cust)
+            zobraz_nejblizsi_zapasy(budouci, sance_cust, pocet_nejblizsich)
 
 else:
     st.info("👈 Nahraj CSV soubor v levém panelu (nebo ulož soubor export.csv do repozitáře na GitHubu).")
