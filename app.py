@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import re
+import os
 from scipy.stats import poisson
 
 st.set_page_config(page_title="Simulátor Tipsport Extraligy", layout="wide")
@@ -88,152 +89,7 @@ def vypocitej_poisson_parametry(odehrane_df, vsechny_tymy):
             "obrana": (obrana_dom + obrana_hos) / 2
         }
     return parametry, prumer_dom, prumer_hos
-# ==========================================
-# KROK 2B: POWER INDEX A ŠANCE ZÁPASŮ
-# ==========================================
-def vypocitej_power_index(odehrane_df, vsechny_tymy):
-    power = {}
-    for tym in vsechny_tymy:
-        dom_z = odehrane_df[odehrane_df["Domácí"] == tym]
-        hos_z = odehrane_df[odehrane_df["Hosté"] == tym]
-        zapasy = len(dom_z) + len(hos_z)
-        if zapasy == 0:
-            power[tym] = 1500.0
-            continue
-        gf = dom_z["G_Dom"].sum() + hos_z["G_Hos"].sum()
-        ga = dom_z["G_Hos"].sum() + hos_z["G_Dom"].sum()
-        pyth = (gf ** 2.15) / ((gf ** 2.15) + (ga ** 2.15)) if (gf + ga) > 0 else 0.5
-        
-        body = 0
-        for _, r in dom_z.iterrows():
-            if r["G_Dom"] > r["G_Hos"]: body += 3 if r["Typ_Konce"] == "60" else 2
-            else: body += 1 if r["Typ_Konce"] != "60" else 0
-        for _, r in hos_z.iterrows():
-            if r["G_Hos"] > r["G_Dom"]: body += 3 if r["Typ_Konce"] == "60" else 2
-            else: body += 1 if r["Typ_Konce"] != "60" else 0
-            
-        bodova_uspesnost = body / (zapasy * 3)
-        kombinovane_skore = 0.5 * bodova_uspesnost + 0.5 * pyth
-        power[tym] = 1000.0 + (kombinovane_skore * 1000.0)
-    return power
 
-def sance_zapas_rating(rating_dict, dom, hos, vyhoda_domaci=50):
-    rozdil_dom = (rating_dict[dom] + vyhoda_domaci) - rating_dict[hos]
-    p_dom_zaklad = 1 / (1 + 10 ** (-rozdil_dom / 400))
-    vyrovnanost = 1 - abs(p_dom_zaklad - 0.5) * 2
-    p_remiza = 0.14 + (0.10 * vyrovnanost)
-    p_dom_3b = p_dom_zaklad * (1 - p_remiza)
-    p_hos_3b = (1 - p_dom_zaklad) * (1 - p_remiza)
-    rozdil_cisty = rating_dict[dom] - rating_dict[hos]
-    p_dom_ot = 1 / (1 + 10 ** (-rozdil_cisty / 400))
-    return p_dom_3b, p_remiza * p_dom_ot, p_remiza * (1 - p_dom_ot), p_hos_3b
-
-def sance_zapas_poisson(params, prumer_dom, prumer_hos, dom, hos):
-    lambda_dom = params[dom]["utok"] * params[hos]["obrana"] * prumer_dom
-    lambda_hos = params[hos]["utok"] * params[dom]["obrana"] * prumer_hos
-    max_golu = 10
-    p_dom = [poisson.pmf(i, lambda_dom) for i in range(max_golu)]
-    p_hos = [poisson.pmf(i, lambda_hos) for i in range(max_golu)]
-    matice = np.outer(p_dom, p_hos)
-    p_dom_3b = np.sum(np.tril(matice, -1))
-    p_remiza = np.sum(np.diag(matice))
-    p_hos_3b = np.sum(np.triu(matice, 1))
-    celkem = p_dom_3b + p_remiza + p_hos_3b
-    p_dom_3b /= celkem; p_remiza /= celkem; p_hos_3b /= celkem
-    p_dom_ot = lambda_dom / (lambda_dom + lambda_hos)
-    return p_dom_3b, p_remiza * p_dom_ot, p_remiza * (1 - p_dom_ot), p_hos_3b
-
-# ==========================================
-# KROK 3: AKTUÁLNÍ TABULKA A MONTE CARLO
-# ==========================================
-def vytvor_aktualni_tabulku(odehrane_df, vsechny_tymy):
-    tabulka = {
-        tym: {"Z": 0, "V": 0, "VP": 0, "PP": 0, "P": 0, "GF": 0, "GA": 0, "Body": 0}
-        for tym in vsechny_tymy
-    }
-    for _, r in odehrane_df.iterrows():
-        dom, hos = r["Domácí"], r["Hosté"]
-        g_dom, g_hos, typ = int(r["G_Dom"]), int(r["G_Hos"]), r["Typ_Konce"]
-        tabulka[dom]["Z"] += 1; tabulka[hos]["Z"] += 1
-        tabulka[dom]["GF"] += g_dom; tabulka[dom]["GA"] += g_hos
-        tabulka[hos]["GF"] += g_hos; tabulka[hos]["GA"] += g_dom
-        
-        if g_dom > g_hos:
-            if typ == "60":
-                tabulka[dom]["V"] += 1; tabulka[dom]["Body"] += 3; tabulka[hos]["P"] += 1
-            else:
-                tabulka[dom]["VP"] += 1; tabulka[dom]["Body"] += 2; tabulka[hos]["PP"] += 1; tabulka[hos]["Body"] += 1
-        else:
-            if typ == "60":
-                tabulka[hos]["V"] += 1; tabulka[hos]["Body"] += 3; tabulka[dom]["P"] += 1
-            else:
-                tabulka[hos]["VP"] += 1; tabulka[hos]["Body"] += 2; tabulka[dom]["PP"] += 1; tabulka[dom]["Body"] += 1
-                
-    df_tab = pd.DataFrame.from_dict(tabulka, orient="index")
-    df_tab["Rozdíl"] = df_tab["GF"] - df_tab["GA"]
-    df_tab = df_tab.sort_values(by=["Body", "Rozdíl", "GF"], ascending=False)
-    df_tab.insert(0, "Pořadí", range(1, len(df_tab) + 1))
-    return df_tab
-
-def spust_simulaci_matice(aktualni_tab_df, budouci_df, sance_zapasu_list, pocet_simulaci=5000):
-    tymy = list(aktualni_tab_df.index)
-    tym_na_idx = {tym: i for i, tym in enumerate(tymy)}
-    n_tymu = len(tymy)
-    n_zapasu = len(budouci_df)
-    
-    start_body = aktualni_tab_df["Body"].values
-    start_rozdil = aktualni_tab_df["Rozdíl"].values
-    
-    celkove_body = np.tile(start_body, (pocet_simulaci, 1)).astype(float)
-    celkove_rozdil = np.tile(start_rozdil, (pocet_simulaci, 1)).astype(float)
-    
-    dom_idx = [tym_na_idx[t] for t in budouci_df["Domácí"]]
-    hos_idx = [tym_na_idx[t] for t in budouci_df["Hosté"]]
-    nahoda = np.random.rand(pocet_simulaci, n_zapasu)
-    
-    for z in range(n_zapasu):
-        d, h = dom_idx[z], hos_idx[z]
-        p1, p2, p3, p4 = sance_zapasu_list[z]
-        r = nahoda[:, z]
-        
-        m_d3 = r < p1
-        celkove_body[m_d3, d] += 3; celkove_rozdil[m_d3, d] += 2; celkove_rozdil[m_d3, h] -= 2
-        
-        m_d2 = (r >= p1) & (r < p1 + p2)
-        celkove_body[m_d2, d] += 2; celkove_body[m_d2, h] += 1; celkove_rozdil[m_d2, d] += 1; celkove_rozdil[m_d2, h] -= 1
-        
-        m_h2 = (r >= p1 + p2) & (r < p1 + p2 + p3)
-        celkove_body[m_h2, h] += 2; celkove_body[m_h2, d] += 1; celkove_rozdil[m_h2, h] += 1; celkove_rozdil[m_h2, d] -= 1
-        
-        m_h3 = r >= p1 + p2 + p3
-        celkove_body[m_h3, h] += 3; celkove_rozdil[m_h3, h] += 2; celkove_rozdil[m_h3, d] -= 2
-
-    skore_pro_razeni = celkove_body + (celkove_rozdil * 0.001) + np.random.uniform(0, 0.0001, celkove_body.shape)
-    poradi_idx = np.argsort(-skore_pro_razeni, axis=1)
-    
-    umisteni = np.empty_like(poradi_idx)
-    radky = np.arange(pocet_simulaci)[:, None]
-    umisteni[radky, poradi_idx] = np.arange(1, n_tymu + 1)
-    
-    vysledky = []
-    for i, tym in enumerate(tymy):
-        pozice = umisteni[:, i]
-        radek_dat = {
-            "Tým": tym,
-            "Akt. body": int(start_body[i]),
-            "Ø Body": round(np.mean(celkove_body[:, i]), 1)
-        }
-        for m in range(1, n_tymu + 1):
-            radek_dat[f"{m}."] = round(np.mean(pozice == m) * 100, 1)
-            
-        radek_dat["1–4 (ČF)"] = round(np.mean(pozice <= 4) * 100, 1)
-        radek_dat["5–12 (Předkolo)"] = round(np.mean((pozice >= 5) & (pozice <= 12)) * 100, 1)
-        radek_dat["13 (Konec)"] = round(np.mean(pozice == 13) * 100, 1)
-        radek_dat["14 (Baráž)"] = round(np.mean(pozice == 14) * 100, 1)
-        vysledky.append(radek_dat)
-        
-    df_matice = pd.DataFrame(vysledky).set_index("Tým")
-    return df_matice
 # ==========================================
 # KROK 4: UŽIVATELSKÉ ROZHRANÍ (STREAMLIT)
 # ==========================================
@@ -247,8 +103,6 @@ with st.sidebar:
     pocet_sim = st.slider("Počet simulací sezóny", min_value=1000, max_value=20000, value=5000, step=1000)
     vyhoda_domaci = st.slider("Bonifikace domácího prostředí (body Elo)", min_value=0, max_value=100, value=50, step=5)
 
-# Rozhodnutí, jaký soubor použít (nahraný od uživatele má přednost před výchozím export.csv)
-import os
 if nahrany_soubor is not None:
     aktivni_zdroj = nahrany_soubor
     st.sidebar.success("✅ Používám tvůj nahraný soubor.")
@@ -260,27 +114,48 @@ else:
 
 if aktivni_zdroj is not None:
     odehrane, budouci, vsechny_tymy = nacti_a_vycisti_data(aktivni_zdroj)
-    odehrane, budouci, vsechny_tymy = nacti_a_vycisti_data(nahrany_soubor)    
+    
     st.subheader(f"📊 Aktuální reálná tabulka (odehráno {len(odehrane)} z {len(odehrane) + len(budouci)} zápasů)")
     aktualni_tab = vytvor_aktualni_tabulku(odehrane, vsechny_tymy)
-    st.dataframe(aktualni_tab, use_container_width=True)
+    
+    # Vizuální oddělení pásem v aktuální tabulce (pod 4., 12. a 13. řádkem)
+    def styl_aktualni_tabulky(df):
+        styly = pd.DataFrame("", index=df.index, columns=df.columns)
+        for i in range(len(df)):
+            poradi = df.iloc[i]["Pořadí"]
+            if poradi in:
+                styly.iloc[i, :] = "border-bottom: 3px solid #ff4b4b;"
+        return styly
+
+    st.dataframe(
+        aktualni_tab.style.apply(styl_aktualni_tabulky, axis=None),
+        use_container_width=True,
+        height=530
+    )
     
     st.divider()
     st.subheader("🔮 Simulace konečného pořadí podle jednotlivých modelů")
     
+    # Vizuální oddělení sloupců (4.|5., 12.|13., 13.|14.) a barevné odlišení pásem
     def zobraz_matici(df_matice):
+        sloupce_1_4 = ["1.", "2.", "3.", "4."]
+        sloupce_5_12 = [f"{m}." for m in range(5, 13)]
         sloupce_pozic = [f"{m}." for m in range(1, 15)]
         sloupce_pasem = ["1–4 (ČF)", "5–12 (Předkolo)", "13 (Konec)", "14 (Baráž)"]
         
-        st.dataframe(
+        styler = (
             df_matice.style
-            .background_gradient(subset=sloupce_pozic, cmap="Blues", vmin=0, vmax=60)
+            .background_gradient(subset=sloupce_1_4, cmap="Greens", vmin=0, vmax=60)
+            .background_gradient(subset=sloupce_5_12, cmap="Blues", vmin=0, vmax=60)
+            .background_gradient(subset=["13."], cmap="Oranges", vmin=0, vmax=60)
+            .background_gradient(subset=["14."], cmap="Reds", vmin=0, vmax=60)
             .background_gradient(subset=["1–4 (ČF)"], cmap="Greens", vmin=0, vmax=100)
             .background_gradient(subset=["14 (Baráž)"], cmap="Reds", vmin=0, vmax=100)
-            .format("{:.1f}", subset=["Ø Body"] + sloupce_pozic + sloupce_pasem),
-            use_container_width=True,
-            height=530
+            .format("{:.1f}", subset=["Ø Body"] + sloupce_pozic + sloupce_pasem)
+            .set_properties(subset=["4.", "12.", "13."], **{"border-right": "3px solid #ff4b4b"})
         )
+        
+        st.dataframe(styler, use_container_width=True, height=530)
 
     tab_elo, tab_poisson, tab_power, tab_custom = st.tabs([
         "📈 Model 1: Elo rating", 
@@ -360,4 +235,4 @@ if aktivni_zdroj is not None:
             zobraz_matici(matice_cust)
 
 else:
-    st.info("👈 Začni tím, že v levém panelu nahraješ CSV soubor se zápasy extraligy.")
+    st.info("👈 Nahraj CSV soubor v levém panelu (nebo ulož soubor export.csv do repozitáře na GitHubu).")
