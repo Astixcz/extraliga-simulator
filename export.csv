@@ -123,21 +123,21 @@ Pá;13.11.2026;18:00;PA;ELH;120;"HC DYNAMO PARDUBICE ";"HC KOMETA BRNO ";6:2
 Pá;13.11.2026;18:00;OL;ELH;121;"HC Olomouc ";"Rytíøi Kladno ";2:3sn
 Pá;13.11.2026;18:00;KV;ELH;123;"BYD Energie Karlovy Vary";"HC Sparta Praha";1:3
 Pá;13.11.2026;18:00;HK;ELH;126;"Mountfield HK, a.s. ";"HC ŠKODA PLZEÒ ";1:2
-Ne;15.11.2026;16:00;KL;ELH;128;"Rytíøi Kladno ";"HC Oceláøi Tøinec ";Pøipraveno
-Ne;15.11.2026;16:00;LB;ELH;129;"Bílí Tygøi Liberec ";"HC Litvínov ";Pøipraveno
-Ne;15.11.2026;16:00;O;ELH;133;"HC Sparta Praha";"Mountfield HK, a.s. ";Pøipraveno
-Ne;15.11.2026;17:00;CB;ELH;127;"BANES Motor Èeské Budìjovice ";"HC DYNAMO PARDUBICE ";Pøipraveno
-Ne;15.11.2026;17:00;VI;ELH;130;"HC VÍTKOVICE RIDERA ";"HC Olomouc ";Pøipraveno
-Ne;15.11.2026;17:30;PL;ELH;131;"HC ŠKODA PLZEÒ ";"BK Mladá Boleslav ";Pøipraveno
-St;18.11.2026;17:00;TW;ELH;141;"HC Oceláøi Tøinec ";"HC Olomouc ";Pøipraveno
-St;18.11.2026;18:00;HK;ELH;106;"Mountfield HK, a.s. ";"HC KOMETA BRNO ";Pøipraveno
-Èt;19.11.2026;17:30;CB;ELH;136;"BANES Motor Èeské Budìjovice ";"HC Sparta Praha";Pøipraveno
-Pá;20.11.2026;12:00;KV;ELH;138;"BYD Energie Karlovy Vary";"HC VÍTKOVICE RIDERA ";Pøipraveno
-Pá;20.11.2026;17:30;LI;ELH;134;"HC Litvínov ";"HC Oceláøi Tøinec ";Pøipraveno
-Pá;20.11.2026;17:30;PL;ELH;137;"HC ŠKODA PLZEÒ ";"HC DYNAMO PARDUBICE ";Pøipraveno
-Pá;20.11.2026;17:30;MB;ELH;140;"BK Mladá Boleslav ";"HC KOMETA BRNO ";Pøipraveno
-Pá;20.11.2026;18:00;HK;ELH;135;"Mountfield HK, a.s. ";"Rytíøi Kladno ";Pøipraveno
-Pá;20.11.2026;18:00;OL;ELH;139;"HC Olomouc ";"Bílí Tygøi Liberec ";Pøipraveno
+Ne;15.11.2026;16:00;KL;ELH;128;"Rytíøi Kladno ";"HC Oceláøi Tøinec ";1:4
+Ne;15.11.2026;16:00;LB;ELH;129;"Bílí Tygøi Liberec ";"HC Litvínov ";5:1
+Ne;15.11.2026;16:00;O;ELH;133;"HC Sparta Praha";"Mountfield HK, a.s. ";1:3
+Ne;15.11.2026;17:00;CB;ELH;127;"BANES Motor Èeské Budìjovice ";"HC DYNAMO PARDUBICE ";2:1
+Ne;15.11.2026;17:00;VI;ELH;130;"HC VÍTKOVICE RIDERA ";"HC Olomouc ";2:1sn
+Ne;15.11.2026;17:30;PL;ELH;131;"HC ŠKODA PLZEÒ ";"BK Mladá Boleslav ";3:2p
+St;18.11.2026;17:00;TW;ELH;141;"HC Oceláøi Tøinec ";"HC Olomouc ";5:3
+St;18.11.2026;18:00;HK;ELH;106;"Mountfield HK, a.s. ";"HC KOMETA BRNO ";6:0
+Èt;19.11.2026;17:30;CB;ELH;136;"BANES Motor Èeské Budìjovice ";"HC Sparta Praha";4:6
+Pá;20.11.2026;12:00;KV;ELH;138;"BYD Energie Karlovy Vary";"HC VÍTKOVICE RIDERA ";3:2
+Pá;20.11.2026;17:30;LI;ELH;134;"HC Litvínov ";"HC Oceláøi Tøinec ";5:2
+Pá;20.11.2026;17:30;PL;ELH;137;"HC ŠKODA PLZEÒ ";"HC DYNAMO PARDUBICE ";3:4
+Pá;20.11.2026;17:30;MB;ELH;140;"BK Mladá Boleslav ";"HC KOMETA BRNO ";0:4
+Pá;20.11.2026;18:00;HK;ELH;135;"Mountfield HK, a.s. ";"Rytíøi Kladno ";2:4
+Pá;20.11.2026;18:00;OL;ELH;139;"HC Olomouc ";"Bílí Tygøi Liberec ";4:2
 Ne;22.11.2026;16:00;LB;ELH;143;"Bílí Tygøi Liberec ";"BK Mladá Boleslav ";Pøipraveno
 Ne;22.11.2026;16:00;KL;ELH;144;"Rytíøi Kladno ";"HC Litvínov ";Pøipraveno
 Ne;22.11.2026;16:30;PL;ELH;146;"HC ŠKODA PLZEÒ ";"BYD Energie Karlovy Vary";Pøipraveno
@@ -158,26 +158,26 @@ Pá;27.11.2026;17:30;PL;ELH;161;"HC ŠKODA PLZEÒ ";"HC KOMETA BRNO ";Pøipraveno
 Pá;27.11.2026;18:00;LB;ELH;157;"Bílí Tygøi Liberec ";"BANES Motor Èeské Budìjovice ";"Nehraje se"
 Pá;27.11.2026;18:00;OL;ELH;159;"HC Olomouc ";"Mountfield HK, a.s. ";Pøipraveno
 Pá;27.11.2026;18:00;KL;ELH;160;"Rytíøi Kladno ";"BYD Energie Karlovy Vary";Pøipraveno
+Ne;29.11.2026;14:00;MB;ELH;167;"BK Mladá Boleslav ";"HC Oceláøi Tøinec ";Pøipraveno
+Ne;29.11.2026;15:00;LB;ELH;165;"Bílí Tygøi Liberec ";"HC DYNAMO PARDUBICE ";Pøipraveno
 Ne;29.11.2026;16:00;KV;ELH;162;"BYD Energie Karlovy Vary";"HC Olomouc ";Pøipraveno
 Ne;29.11.2026;16:00;O;ELH;163;"HC Sparta Praha";"HC ŠKODA PLZEÒ ";Pøipraveno
-Ne;29.11.2026;16:00;LB;ELH;165;"Bílí Tygøi Liberec ";"HC DYNAMO PARDUBICE ";"Èeká na øídící orgán"
+Ne;29.11.2026;16:00;CB;ELH;164;"BANES Motor Èeské Budìjovice ";"HC VÍTKOVICE RIDERA ";Pøipraveno
 Ne;29.11.2026;16:00;HK;ELH;166;"Mountfield HK, a.s. ";"HC Litvínov ";Pøipraveno
-Ne;29.11.2026;16:00;MB;ELH;167;"BK Mladá Boleslav ";"HC Oceláøi Tøinec ";Pøipraveno
-Ne;29.11.2026;17:00;CB;ELH;164;"BANES Motor Èeské Budìjovice ";"HC VÍTKOVICE RIDERA ";Pøipraveno
 Ne;29.11.2026;18:00;R;ELH;168;"HC KOMETA BRNO ";"Rytíøi Kladno ";Pøipraveno
 St;02.12.2026;17:30;VI;ELH;283;"HC VÍTKOVICE RIDERA ";"Bílí Tygøi Liberec ";Pøipraveno
 Èt;03.12.2026;17:00;TW;ELH;173;"HC Oceláøi Tøinec ";"HC Sparta Praha";Pøipraveno
 Pá;04.12.2026;17:30;VI;ELH;175;"HC VÍTKOVICE RIDERA ";"HC ŠKODA PLZEÒ ";Pøipraveno
 Pá;04.12.2026;18:00;KV;ELH;169;"BYD Energie Karlovy Vary";"HC Litvínov ";Pøipraveno
-Pá;04.12.2026;18:00;PA;ELH;170;"HC DYNAMO PARDUBICE ";"HC Olomouc ";"Èeká na øídící orgán"
 Pá;04.12.2026;18:00;HK;ELH;171;"Mountfield HK, a.s. ";"BK Mladá Boleslav ";Pøipraveno
 Pá;04.12.2026;18:00;KL;ELH;172;"Rytíøi Kladno ";"BANES Motor Èeské Budìjovice ";Pøipraveno
 Pá;04.12.2026;18:00;LB;ELH;174;"Bílí Tygøi Liberec ";"HC KOMETA BRNO ";Pøipraveno
+Pá;04.12.2026;18:30;PA;ELH;170;"HC DYNAMO PARDUBICE ";"HC Olomouc ";Pøipraveno
 Ne;06.12.2026;15:00;PA;ELH;177;"HC DYNAMO PARDUBICE ";"Rytíøi Kladno ";Pøipraveno
+Ne;06.12.2026;16:00;CB;ELH;176;"BANES Motor Èeské Budìjovice ";"HC Oceláøi Tøinec ";Pøipraveno
 Ne;06.12.2026;16:00;O;ELH;178;"HC Sparta Praha";"Bílí Tygøi Liberec ";Pøipraveno
 Ne;06.12.2026;16:00;MB;ELH;180;"BK Mladá Boleslav ";"HC Olomouc ";Pøipraveno
 Ne;06.12.2026;16:00;KV;ELH;181;"BYD Energie Karlovy Vary";"Mountfield HK, a.s. ";Pøipraveno
-Ne;06.12.2026;17:00;CB;ELH;176;"BANES Motor Èeské Budìjovice ";"HC Oceláøi Tøinec ";Pøipraveno
 Ne;06.12.2026;17:00;R;ELH;182;"HC KOMETA BRNO ";"HC VÍTKOVICE RIDERA ";Pøipraveno
 Ne;06.12.2026;17:30;PL;ELH;179;"HC ŠKODA PLZEÒ ";"HC Litvínov ";Pøipraveno
 Út;08.12.2026;17:00;KV;ELH;320;"BYD Energie Karlovy Vary";"HC VÍTKOVICE RIDERA ";Pøipraveno
@@ -223,7 +223,7 @@ St;30.12.2026;18:00;PA;ELH;218;"HC DYNAMO PARDUBICE ";"BANES Motor Èeské Budìjov
 St;30.12.2026;18:00;OL;ELH;221;"HC Olomouc ";"HC VÍTKOVICE RIDERA ";Pøipraveno
 St;30.12.2026;18:00;KV;ELH;223;"BYD Energie Karlovy Vary";"HC KOMETA BRNO ";Pøipraveno
 St;30.12.2026;18:00;HK;ELH;224;"Mountfield HK, a.s. ";"HC Sparta Praha";Pøipraveno
-Ne;03.01.2027;15:00;TW;ELH;225;"HC Oceláøi Tøinec ";"HC Litvínov ";Pøipraveno
+Ne;03.01.2027;15:00;TW;ELH;225;"HC Oceláøi Tøinec ";"HC Litvínov ";"Èeká na øídící orgán"
 Ne;03.01.2027;16:00;KL;ELH;226;"Rytíøi Kladno ";"Mountfield HK, a.s. ";Pøipraveno
 Ne;03.01.2027;16:00;O;ELH;227;"HC Sparta Praha";"BANES Motor Èeské Budìjovice ";Pøipraveno
 Ne;03.01.2027;16:00;VI;ELH;229;"HC VÍTKOVICE RIDERA ";"BYD Energie Karlovy Vary";Pøipraveno
@@ -308,13 +308,13 @@ Pá;05.02.2027;18:00;PA;ELH;302;"HC DYNAMO PARDUBICE ";"HC KOMETA BRNO ";Pøiprave
 Pá;05.02.2027;18:00;OL;ELH;303;"HC Olomouc ";"Rytíøi Kladno ";Pøipraveno
 Pá;05.02.2027;18:00;KV;ELH;305;"BYD Energie Karlovy Vary";"HC Sparta Praha";Pøipraveno
 Pá;05.02.2027;18:00;HK;ELH;308;"Mountfield HK, a.s. ";"HC ŠKODA PLZEÒ ";Pøipraveno
+Ne;07.02.2027;16:00;CB;ELH;309;"BANES Motor Èeské Budìjovice ";"HC DYNAMO PARDUBICE ";Pøipraveno
 Ne;07.02.2027;16:00;KL;ELH;310;"Rytíøi Kladno ";"HC Oceláøi Tøinec ";Pøipraveno
 Ne;07.02.2027;16:00;LB;ELH;311;"Bílí Tygøi Liberec ";"HC Litvínov ";Pøipraveno
 Ne;07.02.2027;16:00;O;ELH;315;"HC Sparta Praha";"Mountfield HK, a.s. ";Pøipraveno
 Ne;07.02.2027;16:30;PL;ELH;313;"HC ŠKODA PLZEÒ ";"BK Mladá Boleslav ";Pøipraveno
-Ne;07.02.2027;17:00;CB;ELH;309;"BANES Motor Èeské Budìjovice ";"HC DYNAMO PARDUBICE ";Pøipraveno
 Ne;07.02.2027;17:00;R;ELH;314;"HC KOMETA BRNO ";"BYD Energie Karlovy Vary";Pøipraveno
-St;17.02.2027;17:30;LI;ELH;316;"HC Litvínov ";"HC Oceláøi Tøinec ";Pøipraveno
+St;17.02.2027;17:30;LI;ELH;316;"HC Litvínov ";"HC Oceláøi Tøinec ";"Èeká na øídící orgán"
 St;17.02.2027;17:30;CB;ELH;318;"BANES Motor Èeské Budìjovice ";"HC Sparta Praha";Pøipraveno
 St;17.02.2027;17:30;MB;ELH;322;"BK Mladá Boleslav ";"HC KOMETA BRNO ";Pøipraveno
 St;17.02.2027;18:00;HK;ELH;317;"Mountfield HK, a.s. ";"Rytíøi Kladno ";Pøipraveno
